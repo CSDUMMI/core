@@ -201,12 +201,10 @@ mul =
 
 **Be careful:**
 
-    4 / 0 == Infinity : Float
-    3 / 0 == Infinity : Float
+    4 / 0 == NaN : Float
+    3 / 0 == NaN : Float
 
-This is a bug and Infinity is not a legitimate value
-in Elm, thus you can't match for it.
-You'll have to check beforehand wheter the divisor is 0
+You can only check for this value indirectly using the [`isNaN`](#isNaN) function.
 -}
 fdiv : Float -> Float -> Float
 fdiv =
@@ -232,14 +230,16 @@ function.
 
 **Be careful:**
 
-    4 // 0 == 0
+    4 // 0 == NaN : Float
+    3 // 0 == NaN : Float
 
-This is a bug and you'll have to check before computing the result,
-if your divisor is 0.
+You can only check for this value indirectly using the [`isNaN`](#isNaN) function.
 -}
 idiv : Int -> Int -> Int
-idiv =
-  Elm.Kernel.Basics.idiv
+idiv dividend y =
+  case y of
+    0 -> fdiv 0 0
+    divisor -> Elm.Kernel.Basics.idiv dividend divisor
 
 
 {-| Exponentiation
@@ -553,16 +553,15 @@ information.
 
 **Be careful:**
 
-    modBy 0 5
+    modBy 0 5 == NaN : Float
 
-results in a crash, a **runtime exception** of the sort:
-"Error: Cannot perform mod 0. Division by zero error."
-You'll have to check, that the first argument isn't 0.
-Needless to say, this is a bug!
+You can only check for `NaN` indirectly using [`isNaN`](#isNaN).
 -}
 modBy : Int -> Int -> Int
-modBy =
-  Elm.Kernel.Basics.modBy
+modBy dividend y =
+  case y of
+    0 -> fdiv 0 0
+    divisor -> Elm.Kernel.Basics.modBy dividend divisor
 
 
 {-| Get the remainder after division. Here are bunch of examples of dividing by four:
@@ -580,12 +579,13 @@ information.
 
     remainderBy 0 5 == NaN : Int
 
-This is a bug in Elm and `NaN` isn't a legitimate value.
-You'll have to check beforehand, that the first argument isn't 0.
+You can only check for `NaN` using [`isNaN`](#isNaN)
 -}
 remainderBy : Int -> Int -> Int
-remainderBy =
-  Elm.Kernel.Basics.remainderBy
+remainderBy dividend y =
+  case y of
+    0 -> fdiv 0 0
+    divisor -> Elm.Kernel.Basics.idiv dividend divisor
 
 
 {-| Negate a number.
